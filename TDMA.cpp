@@ -59,15 +59,13 @@ void tdma(float ld[], float md[], float ud[], float rhs[], float x[])
     }
 
     // Forward Substituition
-    for(k = 1; k < size; k++) {
+    for(k = 1; k < size; k++) 
         rhs[k] = rhs[k] - (ld[k] * rhs[k-1]);
-    }
 
     // Backward Substituition
     x[size-1] = rhs[size-1] / md[size-1];
-    for(k = size-2; k >= 0; k--) {
+    for(k = size-2; k >= 0; k--)
         x[k] = (rhs[k] - (ud[k] * x[k+1])) / md[k];
-    }
 }
 
 void output(float a[])
