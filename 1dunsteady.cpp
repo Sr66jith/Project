@@ -36,4 +36,16 @@ void input(float ld[], float md[], float ud[], float rhs[])
         ud[i] = 1.0;
         rhs[i] = 0.0;
     }
+
+    rhs[node-1] = -1;
 }
+
+void tdma(float ld[], float md[], float rhs[], float x[])
+{
+    int k;
+
+    for(k = 1; k < node; k++) {
+        ld[k] = ld[k] / md[k-1];
+        md[k] = md[k] - (ld[k] * ud[k-1]);
+    }
+
