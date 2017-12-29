@@ -9,23 +9,21 @@ int g = 0;
 
 float Bi = 2.0, delx = 1.0/node, delt = 0.5;
 
+// Function declarations
+void input(float *, float *, float *, float *);
+void transient(float *, float *, float *, float *, float *);
+void tdma(float *, float *, float *, float *, float *);
+void update(float *, float *);
+void output(float *);
+
 int main()
 {
-    // Function definitions
-    void input(float *, float *, float *, float *);
-    void transient(float *, float *, float *, float *, float *);
-    void output(float *);
-
     // Variable declarations
     float ld[node], md[node], ud[node], rhs[node], temp[node];
-    cout << "Hello" << " ";
 
     // Function calls
     input(ld, md, ud, rhs);
-//    output(ld);
-//    output(md);
-//    output(ud);
-//    transient(ld, md, ud, rhs, temp);
+    transient(ld, md, ud, rhs, temp);
 
     return 0;
 }
@@ -53,10 +51,6 @@ void input(float ld[], float md[], float ud[], float rhs[])
 
 void transient(float ld[], float md[], float ud[], float rhs[], float temp[])
 {
-    // Function Declarations
-    void tdma(float *, float *, float *, float *, float *);
-    void update(float *, float *);
-
     for(int i = 0; i <= 1.0; i += delt) {
         tdma(ld, md, ud, rhs, temp);
         update(temp, rhs);
