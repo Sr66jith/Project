@@ -1,25 +1,24 @@
 /* 1 D unsteady heat conduction */
 # include <iostream>
 # define node 5
-
+# define time 5
 using namespace std;
 
 // Geometry variable
 int g = 0;
 
-float Bi = 2.0, delx = 1.0/node, delt = 0.5;
+float Bi = 2.0, delx = 1.0/(node-1), delt = 0.5;
 
-// Function declarations
-void input(float *, float *, float *, float *);
-void transient(float *, float *, float *, float *, float *);
-void tdma(float *, float *, float *, float *, float *);
-void update(float *, float *);
 void output(float *);
 
 int main()
 {
     // Variable declarations
     float ld[node], md[node], ud[node], rhs[node], temp[node];
+
+    // Function declarations
+    void input(float *, float *, float *, float *);
+    void transient(float *, float *, float *, float *, float *);
 
     // Function calls
     input(ld, md, ud, rhs);
@@ -35,7 +34,6 @@ void input(float ld[], float md[], float ud[], float rhs[])
 
     c = -delt / (delx * delx);
     a = 1 - (2 * c);
-    cout << a << " " << c << " ";
 
     for(i = 0; i < node; i++) {
         ld[i] = c;
@@ -51,9 +49,13 @@ void input(float ld[], float md[], float ud[], float rhs[])
 
 void transient(float ld[], float md[], float ud[], float rhs[], float temp[])
 {
-    for(int i = 0; i <= 1.0; i += delt) {
+    void tdma(float *, float *, float *, float *, float *);
+    void update(float *, float *);
+
+    for(float i = 0; i <= time; i += delt) {
         tdma(ld, md, ud, rhs, temp);
         update(temp, rhs);
+        cout << i << "\n";
     }
 }
 
@@ -62,11 +64,8 @@ void tdma(float ld[], float md[], float ud[], float rhs[], float x[])
     int k;
 
     for(k = 1; k < node; k++) {
-        ld[k] = ld[k] / md[k-1];
-        md[k] = md[k] - (ld[k] * ud[k-1]);
-    }
-
-    for(k = 1; k < node; k++) {
+        ld[k]  = ld[k] / md[k-1];
+        md[k]  = md[k] - (ld[k] * ud[k-1]);
         rhs[k] = rhs[k] - (ld[k] * rhs[k-1]);
     }
 
