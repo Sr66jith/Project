@@ -1,7 +1,7 @@
 /* For 1 dimensional steady state conduction */
 
 # include <iostream>
-# define node 4
+# define node 5
 using namespace std;
 
 // Geometry variable (0 for slab and 1 for cylinder)
@@ -30,7 +30,7 @@ void input(float ld[], float md[], float ud[], float rhs[])
 {
     int i;
 
-    for(i = 1; i < node; i++) {
+    for(i = 0; i < node; i++) {
         ld[i] = 1.0;
         md[i] = -2.0;
         ud[i] = 1.0;

@@ -18,11 +18,15 @@ int main()
 
     // Variable declarations
     float ld[node], md[node], ud[node], rhs[node], temp[node];
+    cout << "Hello" << " ";
 
     // Function calls
     input(ld, md, ud, rhs);
-    transient(ld, md, ud, rhs, temp);
-    output(temp);
+//    output(ld);
+//    output(md);
+//    output(ud);
+//    transient(ld, md, ud, rhs, temp);
+
     return 0;
 }
 
@@ -33,6 +37,7 @@ void input(float ld[], float md[], float ud[], float rhs[])
 
     c = -delt / (delx * delx);
     a = 1 - (2 * c);
+    cout << a << " " << c << " ";
 
     for(i = 0; i < node; i++) {
         ld[i] = c;
