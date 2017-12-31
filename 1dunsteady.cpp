@@ -1,7 +1,7 @@
 /* 1 D unsteady heat conduction */
 # include <iostream>
 # define node 5
-# define time 5
+# define time 1
 using namespace std;
 
 // Geometry variable
@@ -23,6 +23,7 @@ int main()
     // Function calls
     input(ld, md, ud, rhs);
     transient(ld, md, ud, rhs, temp);
+    output(temp);
 
     return 0;
 }
@@ -55,7 +56,6 @@ void transient(float ld[], float md[], float ud[], float rhs[], float temp[])
     for(float i = 0; i <= time; i += delt) {
         tdma(ld, md, ud, rhs, temp);
         update(temp, rhs);
-        cout << i << "\n";
     }
 }
 
