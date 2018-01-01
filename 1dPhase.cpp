@@ -57,7 +57,7 @@ void transient(float ld[], float md[], float ud[], float rhs[], float theta[], f
 {
     void tdma(float *, float *, float *, float *, float *);
     void update(float *, float *);
-    void phase(float *, float *);
+    void phase(float *, float *, float *, float *, float *);
 
     for(float i = 0; i <= time; i += delt) {
         tdma(ld, md, ud, rhs, theta);
@@ -100,7 +100,7 @@ void phase(float theta[], float liq_frac[], float ld[], float md[], float ud[])
     for(i = 1; i < (node-1); i++) {
 
         if(theta[i] <= theta_m) { // Needs checking
-            liq_frac[i] = liq_frac[i] - 2 * c * theta_m + c * temp[i+1] + c * temp[i-1];
+            liq_frac[i] = liq_frac[i] - 2 * c * theta_m + c * theta[i+1] + c * theta[i-1];
 
             if((liq_frac[i] < 1) && (liq_frac[i] > 0)) {
                 ld[i] = 0.0;
@@ -118,7 +118,7 @@ void phase(float theta[], float liq_frac[], float ld[], float md[], float ud[])
 }
 
 
-/ To output any array of size node
+// To output any array of size node
 void output(float a[])
 {
     for(int i = 0; i < node; i++)
