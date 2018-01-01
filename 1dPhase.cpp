@@ -7,7 +7,7 @@ using namespace std;
 // Geometry variable
 int g = 0;
 
-float Ste = 0.05, Bi = 2.0, theta_m = 0.2; // Assuming water as the heat transfer fluid
+float Ste = 0.05, Bi = 2.0, theta_m = 1; // Assuming water as the heat transfer fluid
 float delx = 1.0/(node-1), delt = 0.5; 
 
 void output(float *);
@@ -15,7 +15,7 @@ void output(float *);
 int main()
 {
     // Variable declarations
-    float ld[node], md[node], ud[node], rhs[node], temp[node], liq_frac[node];
+    float ld[node], md[node], ud[node], rhs[node], theta[node], liq_frac[node];
 
     // Function declarations
     void input(float *, float *, float *, float *, float *);
@@ -23,8 +23,8 @@ int main()
 
     // Function calls
     input(ld, md, ud, rhs, liq_frac);
-    transient(ld, md, ud, rhs, temp, liq_frac);
-    output(temp);
+    transient(ld, md, ud, rhs, theta, liq_frac);
+    output(theta);
 
     return 0;
 }
@@ -42,7 +42,7 @@ void input(float ld[], float md[], float ud[], float rhs[], float liq_frac[])
         ld[i] = c;
         md[i] = a;
         ud[i] = c;
-        rhs[i] = 1.0;
+        rhs[i] = 6.0;
         liq_frac[i] = 0.0;
     }
 
@@ -53,16 +53,16 @@ void input(float ld[], float md[], float ud[], float rhs[], float liq_frac[])
 
 // To execute the transient function for determining the temp. and liquid
 // fraction
-void transient(float ld[], float md[], float ud[], float rhs[], float temp[], float liq_frac[])
+void transient(float ld[], float md[], float ud[], float rhs[], float theta[], float liq_frac[])
 {
     void tdma(float *, float *, float *, float *, float *);
     void update(float *, float *);
     void phase(float *, float *);
 
     for(float i = 0; i <= time; i += delt) {
-        tdma(ld, md, ud, rhs, temp);
-        update(temp, rhs);
-        phase(temp, liq_frac);
+        tdma(ld, md, ud, rhs, theta);
+        update(theta, rhs);
+        phase(theta, liq_frac, ld, md, ud);
     }
 }
 
@@ -91,18 +91,34 @@ void update(float x[], float rhs[])
 }
 
 // To update the liquid fraction term
-void phase(float temp[], float liq_frac[])
+void phase(float theta[], float liq_frac[], float ld[], float md[], float ud[])
 {
     int i;
     float c = (Ste * delt) / (delx * delx);
+    float c1 = -delt / (delx * delx);
 
     for(i = 1; i < (node-1); i++) {
-        if(temp[i] >= theta_m) { // Needs checking
-            liq_frac[i] = liq_frac[i] + 2 * c * theta_m - c * temp[i+1] - c * temp[i-1];
+
+        if(theta[i] <= theta_m) { // Needs checking
+            liq_frac[i] = liq_frac[i] - 2 * c * theta_m + c * temp[i+1] + c * temp[i-1];
+
+            if((liq_frac[i] < 1) && (liq_frac[i] > 0)) {
+                ld[i] = 0.0;
+                md[i] = 1.0;
+                ud[i] = 0.0;
+                theta[i] = theta_m; // Needs checking
+            }
+            else { // Did not consider the variation in coefficients when node = 1 and node = n
+                ld[i] = c1;
+                md[i] = 1 - 2 * c1;
+                ud[i] = c1;
+            }
         }
+    }
+}
 
 
-// To output any array of size node
+/ To output any array of size node
 void output(float a[])
 {
     for(int i = 0; i < node; i++)
