@@ -1,13 +1,13 @@
 /* 1 D conduction dominated phase change */
 # include <iostream>
-# define node 5
+# define node 3
 # define time 1
 using namespace std;
 
 // Geometry variable
 int g = 0;
 
-float Ste = 0.05, Bi = 2.0, theta_m = 1; // Assuming water as the heat transfer fluid
+float Ste = 0.05, Bi = 2.0, theta_m = 0; // Assuming water as the heat transfer fluid
 float delx = 1.0/(node-1), delt = 0.5;
 
 void output(float *);
@@ -21,7 +21,7 @@ int main()
 
     // Function declarations
     void input(float *, float *, float *, float *, float *, float *);
-    void transient(float *, float *, float *, float *, float *, float *, float *);
+    void transient(float *, float *, float *, float *, float *, float *, float *, float *);
 
     // Function calls
     input(ld, md, ud, rhs, liq_frac, liq_frac_old);
@@ -59,13 +59,13 @@ void input(float ld[], float md[], float ud[], float rhs[], float liq_frac[], fl
 void transient(float ld[], float md[], float ud[], float rhs[], float theta[], float liq_frac[], float theta_old[], float liq_frac_old[])
 {
     void tdma(float *, float *, float *, float *, float *);
-    void update(float *, float *);
+    void update(float *, float *, float *);
     void phase(float *, float *, float *, float *, float *);
 
     for(float i = 0; i <= time; i += delt) {
         tdma(ld, md, ud, rhs, theta);
         update(theta, rhs, theta_old);
-        phase(theta, liq_frac, ld, md, ud, theta_old, liq_frac_old);
+//        phase(theta, liq_frac, ld, md, ud, theta_old, liq_frac_old);
     }
 }
 
@@ -87,12 +87,14 @@ void tdma(float ld[], float md[], float ud[], float rhs[], float x[])
 }
 
 // To update the previous temperatures with the new one
-void update(float x[], float rhs[])
+void update(float x[], float rhs[], float theta_old[])
 {
     for(int i = 0; i < node; i++) {
         theta_old[i] = rhs[i];
         rhs[i] = x[i];
     }
+    output(theta_old);
+    cout << "\n";
 }
 
 // To update the liquid fraction term
