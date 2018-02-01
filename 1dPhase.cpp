@@ -7,7 +7,7 @@ using namespace std;
 // Geometry variable
 int g = 0;
 
-float Ste = 0.05, Bi = 2.0, theta_m = 0; // Assuming water as the heat transfer fluid
+float Ste = 0.05, Bi = 2.0, theta_m = 0; 
 float delx = 1.0/(node-1), delt = 0.5;
 
 void output(float *);
