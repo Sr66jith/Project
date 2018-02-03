@@ -1,7 +1,7 @@
 /* 1 D unsteady heat conduction */
 # include <iostream>
 # define node 5
-# define time 1
+# define time 10
 using namespace std;
 
 // Geometry variable
