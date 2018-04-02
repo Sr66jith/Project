@@ -1,11 +1,11 @@
 /* To replicate the Zivkovic's Paper */
 # include <iostream>
 # include <math.h>
-# define size 11
-# define tstep 3
+# define size 81
+# define tstep 500
 using namespace std;
 
-float tm, k, h, rho, c, L, delt, delx, alpha, Fo, ti, tf;
+float tm, k, h, rho, c, L, delt, delx, alpha, Fo, ti, tf, kl, cl, rhol, Fol, alphal;
 float ld[size+1], md[size+1], ud[size+1], rs[size+1], t[size+1], to[size+1];
 float fl[size+1], flo[size+1];
 
@@ -23,23 +23,26 @@ int main() {
     int i;
     constant();
     initialize();
-    for(i = 1; i <= tstep; i++) {
-        cout << "\nTemperature : \n";
-        output(to, i);
+    for(i = 0; i <= tstep; i++) {
+//        cout << "\nTemperature : \n";
+//        output(to, i);
 //        cout << "Liquid Fraction : \n";
 //        output(flo, i);
         matrix();
         tdma(ld, md, ud, rs, t);
-//        if(phase() == 1) {
-//            i--;
-//            continue;
-//       }
+        if(phase() == 1) {
+            i--;
+            continue;
+       }
+
 //        check();
 //        tempcheck();
        update(to, t);
-//       if(i%25 == 0)
-//        cout << t[1] << "\n";
-//        update(flo, fl);
+      // if(i%25 == 0)
+        cout << t[39] << "    ";
+        cout << fl[39] << "  ";
+        cout << t[39] << "\n";
+        update(flo, fl);
     }
 
 //    cout << "\nTemperature : \n";
@@ -69,10 +72,15 @@ void constant() {
     c = 1400;
     L = 187000;
     delt = 5.0;
-    delx = 0.02 / (size-1);
+    delx = 0.01 / (size-1);
     alpha = k / (rho*c);
     Fo = alpha * delt / (delx * delx);
     h = 16.0;
+    kl = 0.53;
+    cl = 2200;
+    rhol = 1530;
+    alphal = kl / (rhol * cl);
+    Fol = alphal * delt / (delx * delx);
 }
 
 void initialize() {
@@ -86,10 +94,15 @@ void initialize() {
 
 void matrix() {
     float ai, aj, ah;
+    float ail, ajl, ahl;
 
     ah = -Fo;
     aj = -Fo;
     ai = 1 + (2 * Fo);
+
+    ahl = -Fol;
+    ajl = -Fol;
+    ail = 1 + (2 * Fol);
 
     for(int i = 1; i <= size; i++) {
         ld[i] = ah;
@@ -104,26 +117,32 @@ void matrix() {
     md[size] = ai - (2 * h * (delx / k) * aj);
     rs[size] = to[size] - (2 * h * (delx / k) * tf * aj);
 
-   /* for( int i = 1; i <= size; i++) {
+    for( int i = 1; i <= size; i++) {
         if(t[i] >= tm) {
             ld[i] = 0;
             md[i] = 1;
             ud[i] = 0;
             rs[i] = tm;
         }
-    }*/
+ /*       if(fl[i] >= 1) {
+            ld[i] = ahl;
+            md[i] = ail;
+            ud[i] = ajl;
+            rs[i] = to[i];
+        } */
+    }
 }
 
 void tdma(float ld[], float md[], float ud[], float rs[], float x[]) {
     int k;
 
-    cout << "\n \n TDMA: \n\n";
-    printf("      %+0.2f %+0.2f\t%+0.2f\n", md[1], ud[1], rs[1]);
-
-    for( int i = 2; i < size; i++)
-        printf("%+0.2f %+0.2f %+0.2f \t%+0.2f\n", ld[i], md[i], ud[i], rs[i]);
-
-     printf("%+0.2f %+0.2f\t\t%+0.2f\n\n", ld[size], md[size], rs[size]);
+//    cout << "\n \n TDMA: \n\n";
+//    printf("      %+0.2f %+0.2f\t%+0.2f\n", md[1], ud[1], rs[1]);
+//
+//    for( int i = 2; i < size; i++)
+//        printf("%+0.2f %+0.2f %+0.2f \t%+0.2f\n", ld[i], md[i], ud[i], rs[i]);
+//
+//    printf("%+0.2f %+0.2f\t\t%+0.2f\n\n", ld[size], md[size], rs[size]);
 
 
     for(k = 2; k <= size; k++) {
@@ -150,6 +169,11 @@ int phase() {
             to[1] = tm;
         }
    }
+    
+    //Checking end of melting
+   //if((fl[1] >= 1)&&(flo[1] < 1)) {
+   //     flag = 1;
+   //}
 
     for(int i = 2; i <= size; i++) { 
         if(t[i] >= tm) {
@@ -160,6 +184,9 @@ int phase() {
                 to[i] = tm;
             }
         }
+//        if((fl[i] >= 1) && (flo[i] < 1)) {
+//            flag = 1;
+//        }
     }
     
     if(t[size] >= tm) {
@@ -170,6 +197,9 @@ int phase() {
             to[size] = tm;
         }
     }
+//    if((fl[size] >= 1) && (flo[size] < 1)) {
+//        flag = 1;  
+//    }
 
     return flag;
 }
