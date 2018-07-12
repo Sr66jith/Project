@@ -1,21 +1,22 @@
 # include <iostream> 
 # include <stdio.h>
-# define N 21
+# define N 81
 using namespace std;
 void grid();void input();void conscalc();void initialize();void matrix();void tdma(int neqs);void slope();void l_entropy();void g_entropy();
 void display();void copy_temp();void update_lf();int meltstart();void liquidfrac();int meltend();
 double delX,alpha_s,alpha_l,Bi_s,Bi_l,delt_s,delt_l,t,lambda_s,lambda_l,theta_f,theta_m,theta_i,T_f,T_m,T_i,theta_inf;
 int step;
-double ste_l,ste_s;int pos;double delta_s,delta_l,gamma,L,b,ko_l,ko_s;
+double ste_l,ste_s;int pos;double delta_s,delta_l,gama,L,b,ko_l,ko_s;
 double a(int type,int pos);
 double theta[N],theta_old[N],lf[N],lf_old[N],ldia[N],dia[N],udia[N],rhs[N],var[N],dtheta[N],s_l[N],s_g;
+double a3;
 
 
 int main(){
 	step=0; pos=-1;
 	grid();input();initialize();
 	for(int i=0;i<1440;i++){
-		for(int j=1;j<1000;j++){
+		for(int j=1;j<100;j++){
 			slope();
 			matrix();	
 			tdma(N);
@@ -45,9 +46,10 @@ void input(){
 	lambda_s=delt_s/delX/delX;lambda_l=delt_l/delX/delX;
 	T_f=60;T_m=29;T_i=17.5;ste_s=0.2321;ste_l=0.3647;
 	theta_f=1;theta_m=0;theta_i=(T_i-T_m)/(T_f-T_m);
-	delta_s=delt_s/delX/2.0;gamma=0.0;delta_l=delt_l/delX/2.0;
+	delta_s=delt_s/delX/2.0;gama=0.0;delta_l=delt_l/delX/2.0;
 	theta_inf=T_m/(T_f-T_m);
 	L=187000;b=0.01;ko_l=0.53;ko_s=1.09;
+    a3=(T_f/T_m)-1;
 }
 void initialize(){
 	for(int i=0;i<N;i++){
@@ -196,8 +198,10 @@ void display(){
 		printf("%0.3lf ",s_l[i]);
 	printf("\n\n");
 	}*/
-	if(step%5==0)
-	printf("%lf %0.3lf\n",((step*5)+5)/60.0,(theta[0]*(T_f-T_m)+T_m));
+	if(step%10==0){
+	    //printf("%lf %0.3lf\n",((step*5)+5)/60.0,(theta[0]*(T_f-T_m)+T_m));
+	    printf("%lf %0.3lf\n",((step*5)+5)/60.0,s_g);
+    }
     step++;
 	//printf("\t::%0.6lf\n",s_l[N-1]);
 	//if(step%100==0){
@@ -214,11 +218,13 @@ void copy_temp(){
 double a(int type,int pos){
 	if(type==1)
 		if(lf[pos]>=1)
-			return 1+gamma*(theta[pos]-theta_m);
+			return 1+gama*(theta[pos]-theta_m);
 		else
-			return 1+gamma*(theta[pos]-theta_i);
+			return 1+gama*(theta[pos]-theta_i);
 	if(type==2)
-		return gamma*dtheta[pos];
+		return gama*dtheta[pos];
+    else
+        return 0;
 }
 		
 void slope(){
@@ -231,15 +237,8 @@ void slope(){
 void l_entropy(){
 	//for(int i=0;i<N;i++)
 	//	s_l[i]=0;
-	for(int i=0;i<N;i++){
-	//	if(lf[i]<1){
-			s_l[i]=(a(1,i)*dtheta[i]*dtheta[i]/(theta[i]+theta_inf));//*(1-lf[i]);
-			//s_l[i]+=lf[i]*L*b*b/ko_l/T_m;
-		//}
-		//if(lf[i]>=1)
-		//	s_l[i]+=(a(1,i)*dtheta[i]*dtheta[i]/(theta[i]+theta_inf));
-		
-	}
+	for(int i=0;i<N;i++)
+		s_l[i]=(a(1,i)*a3*a3*dtheta[i]*dtheta[i])/((1+a3*theta[i])*(1+a3*theta[i]));
 }
 
 void g_entropy(){
